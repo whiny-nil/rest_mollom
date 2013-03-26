@@ -31,7 +31,11 @@ module RestMollom
                     @oa_access.post "#{path}/#{options[:public_key]}", params, @conn_header
                   when :create
                     if @conn_options[:site].match(/dev/)
-                      Net::HTTP.post_form(URI("#{@conn_options[:site]}#{path}"), params)
+                      uri = URI("#{@conn_options[:site]}#{path}")
+                      req = Net::HTTP::Post.new(uri.path)
+                      req.set_form_data(params)
+                      req["Accept"] = "application/json"
+                      Net::HTTP.start(uri.host, uri.port) { |http| http.request(req) }
                     else
                       @oa_access.post path, params, @conn_header
                     end
