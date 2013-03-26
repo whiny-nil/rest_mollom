@@ -6,6 +6,15 @@ require "rest_mollom/version"
 
 class RMollom
   include RestMollom
+
+  def self.create_test_site(email)
+    resp = RMollom.new.api.site(:create, {}, {:email => email})
+    if resp["code"] == "200"
+      {:public_key => resp["site"]["publicKey"], :private_key => resp["site"]["privateKey"]}
+    else
+      nil
+    end
+  end
   
   attr_accessor :api
   
