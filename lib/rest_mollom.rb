@@ -15,9 +15,9 @@ class RMollom
       nil
     end
   end
-  
-  attr_accessor :api
-  
+
+  attr_accessor :api, :last_response
+
   #
   # options:
   # :site => api endpoint, default to production url
@@ -28,25 +28,25 @@ class RMollom
     @debug = options.delete :debug
     @api = MollomApi.new(options)
   end
-  
+
   def check_content(content={})
-    response = @api.content(:create, content)
-    return nil if response[:status] == 'error'
-    
-    ContentResponse.new response
+    last_response = @api.content(:create, content)
+    return nil if last_response[:status] == 'error'
+
+    ContentResponse.new last_response
   end
-  
+
   def create_captcha(content={})
     content = {:type => 'image'}.merge!(content)
     @api.captcha(:create, content)
   end
-  
+
   def valid_captcha?(content={})
-    response = @api.captcha :verify, content
-    response['captcha']['solved'] == '1'
+    last_response = @api.captcha :verify, content
+    last_response && last_response['captcha'] && last_response['captcha']['solved'] == '1'
   end
 
-  
+
   protected
   def log(message)
     puts message if @debug
